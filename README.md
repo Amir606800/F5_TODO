@@ -2,19 +2,18 @@
 
 A simple Todo REST API built with Go and PostgreSQL. The project supports creating, reading, updating, and deleting tasks, with validation, pagination, filtering, database migrations, Docker support, and unit tests.
 
-## How to Run
 
 ### Requirements
 
 - Go 1.26+
 - Docker and Docker Compose
 
-### Run with Docker
+## How to Run
 
 Clone the repository and move into the project directory:
 
-- git clone <repository-url>
-- cd F5
+git clone <repository-url>
+cd F5
 
 Create a .env file in the project root based on the .env.example file:
 
@@ -23,13 +22,15 @@ POSTGRES_PASSWORD=your_password
 POSTGRES_DB=f5_todo
 API_URL=":8082"
 
+### Run with Docker
+
 Start the application:
 
-- docker compose up --build
+docker compose up --build
 
 The API will be available at:
 
-- http://localhost:8085
+http://localhost:8085
 
 PostgreSQL is exposed on port 5433 on the host machine.
 
@@ -37,11 +38,11 @@ PostgreSQL is exposed on port 5433 on the host machine.
 
 Install the dependencies:
 
-- go mod download
+go mod download
 
 Run the API:
 
-- go run ./cmd/api
+go run ./cmd/api
 
 The application expects the database connection settings to be available through environment variables.
 
@@ -49,16 +50,16 @@ The application expects the database connection settings to be available through
 
 Run all tests:
 
-- go test ./...
+go test ./...
 
 Run tests with coverage:
 
-- go test ./... -cover
+go test ./... -cover
 
 To generate a detailed coverage report:
 
-- go test ./... -coverprofile=coverage.out
-- go tool cover -html=coverage.out
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out
 
 
 ## Technology Choices
