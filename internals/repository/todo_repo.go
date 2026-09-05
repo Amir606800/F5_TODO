@@ -54,3 +54,11 @@ func (r *Repository) FetchTask(ctx context.Context, taskID uuid.UUID) (*model.To
 
 	return &task, nil
 }
+
+func (r *Repository) CreateTask(ctx context.Context, task model.TodoCreateRequest) error {
+	_, err := r.pool.Exec(ctx, "INSERT INTO tasks(title) values($1)", task.Title)
+	if err != nil {
+		return fmt.Errorf("error occurred during task creation")
+	}
+	return nil
+}
