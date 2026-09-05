@@ -7,10 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 )
 
 type TodoService interface {
-	GetTasks(ctx context.Context) ([]*model.Todo, error)
+	GetTasks(ctx context.Context, queries model.TodoListQuery) ([]*model.Todo, error)
 	GetTask(ctx context.Context, taskID string) (*model.Todo, error)
 	CreateTask(ctx context.Context, taskReq model.TodoCreateRequest) error
 	DeleteTask(ctx context.Context, taskIDStr string) error
@@ -18,9 +19,36 @@ type TodoService interface {
 }
 
 func (h *Handler) GetTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := h.svc.GetTasks(r.Context())
+	q := model.TodoListQuery{
+		Limit:  10,
+		Offset: 0,
+	}
+
+	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
+		limit, err := strconv.Atoi(limitStr)
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, "Invalid limit")
+			return
+		}
+		q.Limit = limit
+	}
+
+	if offsetStr := r.URL.Query().Get("offset"); offsetStr != "" {
+		offset, err := strconv.Atoi(offsetStr)
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, "Invalid offset")
+			return
+		}
+		q.Offset = offset
+	}
+
+	if status := r.URL.Query().Get("status"); status != "" {
+		q.Status = &status
+	}
+
+	tasks, err := h.svc.GetTasks(r.Context(), q)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err.Error())
+		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
 
@@ -35,8 +63,10 @@ func (h *Handler) GetTask(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case errors.Is(err, apperrors.ErrTaskNotFound):
 		writeJSON(w, http.StatusNotFound, err.Error())
+		return
 	case errors.Is(err, apperrors.ErrInvalidID):
 		writeJSON(w, http.StatusBadRequest, err.Error())
+		return
 	case err != nil:
 		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
@@ -50,7 +80,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&taskReq)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err.Error())
+		writeJSON(w, http.StatusBadRequest, apperrors.ErrInvalidRequest)
 		return
 	}
 
@@ -79,8 +109,10 @@ func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case errors.Is(err, apperrors.ErrTaskNotFound):
 		writeJSON(w, http.StatusNotFound, err.Error())
+		return
 	case errors.Is(err, apperrors.ErrInvalidID):
 		writeJSON(w, http.StatusBadRequest, err.Error())
+		return
 	case err != nil:
 		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
@@ -93,25 +125,26 @@ func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	var taskReq model.TodoUpdateRequest
 	err := json.NewDecoder(r.Body).Decode(&taskReq)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err.Error())
+		writeJSON(w, http.StatusBadRequest, apperrors.ErrInvalidRequest)
 		return
 	}
 
-	taskIdStr := r.PathValue("id")
+	taskIDStr := r.PathValue("id")
 
-	err = h.svc.UpdateTask(r.Context(), taskIdStr, taskReq)
+	err = h.svc.UpdateTask(r.Context(), taskIDStr, taskReq)
 
 	switch {
 	case errors.Is(err, apperrors.ErrInvalidID):
 		writeJSON(w, http.StatusBadRequest, err.Error())
-
+		return
 	case errors.Is(err, apperrors.ErrTaskNotFound):
 		writeJSON(w, http.StatusNotFound, err.Error())
-
+		return
 	case errors.Is(err, apperrors.ErrTitleEmpty),
 		errors.Is(err, apperrors.ErrTitleTooLong),
 		errors.Is(err, apperrors.ErrInvalidStatus):
 		writeJSON(w, http.StatusBadRequest, err.Error())
+		return
 	case err != nil:
 		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return

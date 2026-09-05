@@ -9,4 +9,5 @@ var (
 	ErrTitleEmpty     = errors.New("title should not be empty string")
 	ErrInvalidStatus  = errors.New("invalid status requested")
 	ErrTitleTooLong   = errors.New("title is too long, 200 chars max")
+	ErrInvalidDueDate = errors.New("invalid due date given")
 )
