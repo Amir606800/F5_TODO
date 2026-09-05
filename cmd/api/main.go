@@ -17,7 +17,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error when loading .env: ", err)
+		log.Println("No .env file found, using environment variables")
 	}
 
 	ctx := context.Background()
@@ -27,7 +27,7 @@ func main() {
 	db := os.Getenv("POSTGRES_DB")
 
 	connString := fmt.Sprintf(
-		"postgres://%s:%s@localhost:5433/%s?sslmode=disable",
+		"postgres://%s:%s@postgres:5432/%s?sslmode=disable",
 		user,
 		pass,
 		db,
@@ -58,8 +58,7 @@ func main() {
 	mux.HandleFunc("GET /tasks/{id}", hand.GetTask)
 	mux.HandleFunc("DELETE /tasks/{id}", hand.DeleteTask)
 	mux.HandleFunc("PATCH /tasks/{id}", hand.UpdateTask)
-	//mux.HandleFunc("GET /tasks?status=done", hand.GetTasks)
 
-	fmt.Println("Server starting on :8082")
+	fmt.Println("Server starting on :8085")
 	log.Fatal(http.ListenAndServe(os.Getenv("API_URL"), mux))
 }

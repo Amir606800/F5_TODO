@@ -85,6 +85,24 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "UpdateTask",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/tasks/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tasks",
+            ""
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "variable": [
