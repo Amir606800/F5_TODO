@@ -57,7 +57,7 @@ func main() {
 	mux.HandleFunc("POST /tasks", hand.CreateTask)
 	mux.HandleFunc("GET /tasks/{id}", hand.GetTask)
 	mux.HandleFunc("DELETE /tasks/{id}", hand.DeleteTask)
-	//mux.HandleFunc("PATCH /tasks/{id}", hand)
+	mux.HandleFunc("PATCH /tasks/{id}", hand.UpdateTask)
 	//mux.HandleFunc("GET /tasks?status=done", hand.GetTasks)
 
 	fmt.Println("Server starting on :8082")

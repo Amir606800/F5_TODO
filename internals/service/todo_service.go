@@ -14,6 +14,7 @@ type TodoRepo interface {
 	FetchTask(ctx context.Context, taskID uuid.UUID) (*model.Todo, error)
 	CreateTask(ctx context.Context, task model.TodoCreateRequest) error
 	DeleteTask(ctx context.Context, taskID uuid.UUID) error
+	UpdateTask(ctx context.Context, taskID uuid.UUID, taskReq model.TodoUpdateRequest) error
 }
 
 func (s *Services) GetTasks(ctx context.Context) ([]*model.Todo, error) {
@@ -55,4 +56,34 @@ func (s *Services) DeleteTask(ctx context.Context, taskIDStr string) error {
 		return apperrors.ErrInvalidID
 	}
 	return s.repo.DeleteTask(ctx, taskID)
+}
+
+func (s *Services) UpdateTask(ctx context.Context, taskIDStr string, taskReq model.TodoUpdateRequest) error {
+	taskID, err := uuid.Parse(taskIDStr)
+	if err != nil {
+		return apperrors.ErrInvalidID
+	}
+
+	title := strings.TrimSpace(taskReq.Title)
+
+	if title == "" {
+		return apperrors.ErrTitleEmpty
+	}
+
+	if len(title) > 200 {
+		return apperrors.ErrTitleTooLong
+	}
+
+	taskReq.Title = title
+
+	if strings.ToLower(taskReq.Status) != "pending" && strings.ToLower(taskReq.Status) != "done" {
+		return apperrors.ErrInvalidStatus
+	}
+
+	err = s.repo.UpdateTask(ctx, taskID, taskReq)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -75,3 +75,24 @@ func (r *Repository) DeleteTask(ctx context.Context, taskID uuid.UUID) error {
 
 	return nil
 }
+
+func (r *Repository) UpdateTask(ctx context.Context, taskID uuid.UUID, taskReq model.TodoUpdateRequest) error {
+	title := taskReq.Title
+	status := taskReq.Status
+	dueDate := taskReq.DueDate
+
+	tag, err := r.pool.Exec(ctx,
+		`UPDATE tasks 
+			 SET title=$1, status=$2, due_date=$3 
+			 WHERE id=$4`,
+		title, status, dueDate, taskID)
+	if err != nil {
+		return fmt.Errorf("error occurred on updating task")
+	}
+
+	if tag.RowsAffected() == 0 {
+		return apperrors.ErrTaskNotFound
+	}
+
+	return nil
+}
