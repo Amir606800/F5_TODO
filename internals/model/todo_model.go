@@ -17,3 +17,9 @@ type Todo struct {
 type TodoCreateRequest struct {
 	Title string `json:"title"`
 }
+
+type TodoUpdateRequest struct {
+	Title   string    `json:"title"`
+	Status  string    `json:"status"`
+	DueDate time.Time `json:"due_date"`
+}

@@ -14,6 +14,7 @@ type TodoService interface {
 	GetTask(ctx context.Context, taskID string) (*model.Todo, error)
 	CreateTask(ctx context.Context, taskReq model.TodoCreateRequest) error
 	DeleteTask(ctx context.Context, taskIDStr string) error
+	UpdateTask(ctx context.Context, taskIDStr string, taskReq model.TodoUpdateRequest) error
 }
 
 func (h *Handler) GetTasks(w http.ResponseWriter, r *http.Request) {
@@ -34,10 +35,8 @@ func (h *Handler) GetTask(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case errors.Is(err, apperrors.ErrTaskNotFound):
 		writeJSON(w, http.StatusNotFound, err.Error())
-		return
 	case errors.Is(err, apperrors.ErrInvalidID):
 		writeJSON(w, http.StatusBadRequest, err.Error())
-		return
 	case err != nil:
 		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
@@ -51,7 +50,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&taskReq)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, apperrors.ErrInvalidRequest)
+		writeJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -72,10 +71,6 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	taskIDStr := r.PathValue("id")
 
@@ -84,10 +79,39 @@ func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case errors.Is(err, apperrors.ErrTaskNotFound):
 		writeJSON(w, http.StatusNotFound, err.Error())
-		return
 	case errors.Is(err, apperrors.ErrInvalidID):
 		writeJSON(w, http.StatusBadRequest, err.Error())
+	case err != nil:
+		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
+	var taskReq model.TodoUpdateRequest
+	err := json.NewDecoder(r.Body).Decode(&taskReq)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	taskIdStr := r.PathValue("id")
+
+	err = h.svc.UpdateTask(r.Context(), taskIdStr, taskReq)
+
+	switch {
+	case errors.Is(err, apperrors.ErrInvalidID):
+		writeJSON(w, http.StatusBadRequest, err.Error())
+
+	case errors.Is(err, apperrors.ErrTaskNotFound):
+		writeJSON(w, http.StatusNotFound, err.Error())
+
+	case errors.Is(err, apperrors.ErrTitleEmpty),
+		errors.Is(err, apperrors.ErrTitleTooLong),
+		errors.Is(err, apperrors.ErrInvalidStatus):
+		writeJSON(w, http.StatusBadRequest, err.Error())
 	case err != nil:
 		writeJSON(w, http.StatusInternalServerError, "internal server error")
 		return
