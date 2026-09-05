@@ -1,1 +1,36 @@
 package repository
+
+import (
+	"F5/internals/model"
+	"context"
+	"fmt"
+)
+
+func (r *Repository) FetchTasks(ctx context.Context) ([]*model.Todo, error) {
+	rows, err := r.pool.Query(ctx, "SELECT id, title, status, created_at FROM tasks")
+	if err != nil {
+		return nil, fmt.Errorf("fetch tasks: %w", err)
+	}
+	defer rows.Close()
+
+	var tasks []*model.Todo
+	for rows.Next() {
+		var task model.Todo
+		if err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Status,
+			&task.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan task: %w", err)
+		}
+
+		if err := rows.Err(); err != nil {
+			return nil, fmt.Errorf("iterate tasks: %w", err)
+		}
+
+		tasks = append(tasks, &task)
+	}
+
+	return tasks, nil
+}
