@@ -54,6 +54,7 @@ func main() {
 
 	// TODOS
 	mux.HandleFunc("GET /tasks", hand.GetTasks)
+	mux.HandleFunc("GET /tasks/{id}", hand.GetTask)
 
 	fmt.Println("Server starting on :8082")
 	log.Fatal(http.ListenAndServe(os.Getenv("API_URL"), mux))

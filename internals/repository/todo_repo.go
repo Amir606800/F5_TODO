@@ -1,9 +1,14 @@
 package repository
 
 import (
+	"F5/internals/apperrors"
 	"F5/internals/model"
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *Repository) FetchTasks(ctx context.Context) ([]*model.Todo, error) {
@@ -33,4 +38,19 @@ func (r *Repository) FetchTasks(ctx context.Context) ([]*model.Todo, error) {
 	}
 
 	return tasks, nil
+}
+
+func (r *Repository) FetchTask(ctx context.Context, taskID uuid.UUID) (*model.Todo, error) {
+	row := r.pool.QueryRow(ctx, "SELECT id, title, status, created_at FROM tasks WHERE id = $1", taskID)
+	var task model.Todo
+
+	err := row.Scan(&task.ID, &task.Title, &task.Status, &task.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.ErrTaskNotFound
+		}
+		return nil, fmt.Errorf("scan task: %w", err)
+	}
+
+	return &task, nil
 }
