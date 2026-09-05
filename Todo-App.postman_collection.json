@@ -1,0 +1,96 @@
+{
+  "info": {
+    "_postman_id": "113be1cd-64c2-45ce-bb1e-cdcfe20286d0",
+    "name": "Todo-App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56906092",
+    "_collection_link": "https://go.postman.co/collection/56906092-113be1cd-64c2-45ce-bb1e-cdcfe20286d0?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "GetTasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/tasks",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tasks"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetTask",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/tasks/33c82718-c5b6-4734-89a9-6548b11322c9",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tasks",
+            "33c82718-c5b6-4734-89a9-6548b11322c9"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CreateTask",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\":\"Creating notes\",\r\n    \"status\":\"pending\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/tasks",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tasks"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DeleteTask",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/tasks/4a4a0014-3cea-4e49-bb49-88c5f9b9f295",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "tasks",
+            "4a4a0014-3cea-4e49-bb49-88c5f9b9f295"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}

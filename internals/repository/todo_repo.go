@@ -62,3 +62,16 @@ func (r *Repository) CreateTask(ctx context.Context, task model.TodoCreateReques
 	}
 	return nil
 }
+
+func (r *Repository) DeleteTask(ctx context.Context, taskID uuid.UUID) error {
+	tag, err := r.pool.Exec(ctx, "DELETE FROM tasks WHERE id = $1", taskID)
+	if err != nil {
+		return fmt.Errorf("error occurred when deleting task")
+	}
+
+	if tag.RowsAffected() == 0 {
+		return apperrors.ErrTaskNotFound
+	}
+
+	return nil
+}

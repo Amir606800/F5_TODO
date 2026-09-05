@@ -54,8 +54,11 @@ func main() {
 
 	// TODOS
 	mux.HandleFunc("GET /tasks", hand.GetTasks)
-	mux.HandleFunc("GET /tasks/{id}", hand.GetTask)
 	mux.HandleFunc("POST /tasks", hand.CreateTask)
+	mux.HandleFunc("GET /tasks/{id}", hand.GetTask)
+	mux.HandleFunc("DELETE /tasks/{id}", hand.DeleteTask)
+	//mux.HandleFunc("PATCH /tasks/{id}", hand)
+	//mux.HandleFunc("GET /tasks?status=done", hand.GetTasks)
 
 	fmt.Println("Server starting on :8082")
 	log.Fatal(http.ListenAndServe(os.Getenv("API_URL"), mux))

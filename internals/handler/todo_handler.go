@@ -13,6 +13,7 @@ type TodoService interface {
 	GetTasks(ctx context.Context) ([]*model.Todo, error)
 	GetTask(ctx context.Context, taskID string) (*model.Todo, error)
 	CreateTask(ctx context.Context, taskReq model.TodoCreateRequest) error
+	DeleteTask(ctx context.Context, taskIDStr string) error
 }
 
 func (h *Handler) GetTasks(w http.ResponseWriter, r *http.Request) {
@@ -73,4 +74,24 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	taskIDStr := r.PathValue("id")
+
+	err := h.svc.DeleteTask(r.Context(), taskIDStr)
+
+	switch {
+	case errors.Is(err, apperrors.ErrTaskNotFound):
+		writeJSON(w, http.StatusNotFound, err.Error())
+		return
+	case errors.Is(err, apperrors.ErrInvalidID):
+		writeJSON(w, http.StatusBadRequest, err.Error())
+		return
+	case err != nil:
+		writeJSON(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -13,6 +13,7 @@ type TodoRepo interface {
 	FetchTasks(ctx context.Context) ([]*model.Todo, error)
 	FetchTask(ctx context.Context, taskID uuid.UUID) (*model.Todo, error)
 	CreateTask(ctx context.Context, task model.TodoCreateRequest) error
+	DeleteTask(ctx context.Context, taskID uuid.UUID) error
 }
 
 func (s *Services) GetTasks(ctx context.Context) ([]*model.Todo, error) {
@@ -46,4 +47,12 @@ func (s *Services) CreateTask(ctx context.Context, taskReq model.TodoCreateReque
 	}
 
 	return nil
+}
+
+func (s *Services) DeleteTask(ctx context.Context, taskIDStr string) error {
+	taskID, err := uuid.Parse(taskIDStr)
+	if err != nil {
+		return apperrors.ErrInvalidID
+	}
+	return s.repo.DeleteTask(ctx, taskID)
 }
